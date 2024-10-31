@@ -12,3 +12,6 @@ Current branch `test `contains:
 * [#35 [Performance] Improve overall performance/](https://github.com/Ceddini/CoreKeeperMapTool/pull/35)
 * [#42 Update of `tiles`](https://github.com/Ceddini/CoreKeeperMapTool/pull/42)
 * [#46 Update of `pois`](https://github.com/Ceddini/CoreKeeperMapTool/pull/46)
+
+
+This branch <b>must not</b> be merged as it only is used for testing purpose. 
