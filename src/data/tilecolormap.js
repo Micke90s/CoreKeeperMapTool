@@ -279,7 +279,7 @@ let tileColors = [
 		"set": TileType.Ungrouped,
 		"tiles": [
 		]
-	},
+	},*/
 ];
 
 let tileColorMap = [
