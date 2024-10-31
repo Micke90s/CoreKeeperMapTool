@@ -62,46 +62,13 @@ function _isBoulder(elem) {
 	return parentMenu.getAttribute("ID") == "boulder-menu";
 }
 
-function hexToRgb(hex) {
-	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-	return result ? {
-		r: parseInt(result[1], 16),
-		g: parseInt(result[2], 16),
-		b: parseInt(result[3], 16)
-	} : null;
-}
-
 function buildHighlightSelection(search) {
-	for (let tile of Alpine.store('tilecolormap').visible) {
-		search.count++;
-		filterObj = isBoulder(tile) ? search.boulders : search;
-
-		if (!filterObj[tile.r]) {
-			((filterObj[tile.r] = {})[tile.g] = {})[tile.b] = true;
-		} else if (!filterObj[tile.r][tile.g]) {
-			(filterObj[tile.r][tile.g] = {})[tile.b] = true;
-		} else {
-			filterObj[tile.r][tile.g][tile.b] = true;
-		}
-	}
-
-	if (Alpine.store('data').showCustomHighlightColor) {
-		search.count++;
-
-		const customHighlightColor = Alpine.store("data").customHighlightColor;
-		console.log("Highlighting: " + customHighlightColor);
-
-		const customColorRGB = hexToRgb(customHighlightColor);
-		console.log("In RGB: " + customColorRGB);
-
-		if (!search[customColorRGB.r]) {
-			((search[customColorRGB.r] = {})[customColorRGB.g] = {})[customColorRGB.b] = true;
-		} else if (!search[customColorRGB.r][customColorRGB.g]) {
-			(search[customColorRGB.r][customColorRGB.g] = {})[customColorRGB.b] = true;
-		} else {
-			search[customColorRGB.r][customColorRGB.g][customColorRGB.b] = true;
-		}
-	}
+	const tiles = Alpine.store('tilecolormap').visible;
+	if(tiles.length === 0) return null;
+	return {
+		normal: new TileFilter( tiles.filter(tile=>!isBoulder(tile)) ),
+		boulders: new TileFilter( tiles.filter(isBoulder) )
+	};
 }
 
 function _buildHighlightSelection(search) {

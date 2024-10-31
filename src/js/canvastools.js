@@ -1,32 +1,29 @@
+// include { buildHighlightSelection } from "./menubuilder.js";
+
 let currentZoom = 1
 let MAX_ZOOM = 12;
 let MIN_ZOOM = 0.1;
 let _image_cache = undefined;
-let cameraOffset = { x: 0, y: 0 }
+let _image_pixelData = null;
+let _decorated_pixelData = null;
+let cameraOffset = { x: 0, y: 0 };
 let previousCoreRelativeOffset = undefined;
 let _global_ctx;
 let coreLoc = { x: 0, y: 0 };
 let pixelMap = {};
 let panZoomElem;
-let mousePosElem;
 
-let shouldDrawOnOverlay = true;
-
-
-const STONE_ARC_START_OFFSET = Math.PI / 2;
-const STONE_ARC_END_OFFSET = Math.PI / 2;
-
-const CLAY_ARC_START_OFFSET = -Math.PI / 2;
-const CLAY_ARC_END_OFFSET = -Math.PI / 2;
-
-const DESERT_ARC_START_OFFSET = Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3);
-const DESERT_ARC_END_OFFSET = Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3);
-
-const WILDERNESS_ARC_START_OFFSET = Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2;
-const WILDERNESS_ARC_END_OFFSET = Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2;
-
-const SUNKENSEA_ARC_START_OFFSET = Math.PI / 2 + (2.25 * Math.PI / 180);
-const SUNKENSEA_ARC_END_OFFSET = Math.PI / 2 - (2.25 * Math.PI / 180);
+function getCanvasPixelData()
+{
+	if(!_image_pixelData)
+	{
+		_image_pixelData = _global_ctx.getImageData(0, 0, canvas.width, canvas.height);
+		return _image_pixelData; 
+	}
+	const cloneData = new Uint8ClampedArray(_image_pixelData.data);
+	const clone = new ImageData(cloneData, _image_pixelData.width, _image_pixelData.height);
+	return clone;
+}
 
 function panImage(dx, dy) {
 	cameraOffset.x += dx;
@@ -50,8 +47,7 @@ function getCoreOffset() {
 
 function panToCore() {
 	const { x, y } = getCoreOffset();
-	xOffset = (document.getElementById("offcanvas").classList.contains("show")) ? 200 : 0;
-	panZoomElem.pan(x + xOffset, y);
+	panZoomElem.pan(x, y);
 }
 
 function panToPreviousCoreRelativeOffset() {
@@ -126,10 +122,11 @@ function zoomWithMouseWheel(event) {
 
 
 	panZoomElem.zoomToPoint(targetScale, event, opts);
+	const mapCanvas = document.getElementById('mapcanvas');
 	if (panZoomElem.getScale() < 1.0) {
-		document.getElementById("mapcanvas").style.imageRendering = "auto";
+		mapCanvas.style.imageRendering = "auto";
 	} else {
-		document.getElementById("mapcanvas").style.imageRendering = "pixelated";
+		mapCanvas.style.imageRendering = "pixelated";
 	}
 	storeCoreRelativeOffset();
 }
@@ -140,44 +137,24 @@ function updateCoordinates(event) {
 	if (tempY < 0) { tempY = 0; }
 }
 
-
-let mouseTilePos = { x: 0, y: 0 };
-
-function updateMousePos(event) {
-	if (Alpine.store("data").mapLoaded === false) return;
-
-	const mouseX = event.pageX - (window.innerWidth / 2);
-	const mouseY = event.pageY - (window.innerHeight / 2);
-
-	const { x, y } = getCoreRelativeOffset();
-
-	let posX = Math.round(mouseX / panZoomElem.getScale() + x);
-	let posY = Math.round(mouseY / panZoomElem.getScale() + y);
-
-	mouseTilePos.x = posX;
-	mouseTilePos.y = posY;
-
-	let distance = Math.round(Math.sqrt((posX * posX) + (posY * posY)));
-
-	mousePosElem.innerHTML = `X: ${posX}, Y: ${-posY}<br>Distance: ${distance}`;
-}
-
-function drawExamplePin() {
-	drawOverlayPin(0, 0, "Spawn location");
-}
-
 function setContext(ctx, width, height) {
 	ctx.imageSmoothingEnabled = false;
 	ctx.clearRect(0, 0, width, height);
 }
 
 function redrawMap() {
-	const canvas = document.getElementById("mapcanvas");
-	setContext(_global_ctx, canvas.width, canvas.height);
+	const mapCanvas = document.getElementById('mapcanvas');
+	setContext(_global_ctx, mapCanvas.width, mapCanvas.height);
+	_global_ctx.putImageData(_decorated_pixelData, 0, 0);
+	decorateMap(mapCanvas.width, mapCanvas.height);
+}
+
+function redrawMapDirty() {
+	const mapCanvas = document.getElementById('mapcanvas');
+	setContext(_global_ctx, mapCanvas.width, mapCanvas.height);
 	_global_ctx.drawImage(_image_cache, 0, 0);
-	// Reset overlays
-	resetOverlayLists();
-	decorateMap(canvas.width, canvas.height);
+	highlightSelected();
+	decorateMap(mapCanvas.width, mapCanvas.height);
 }
 
 function loop(val, min, max) {
@@ -185,29 +162,24 @@ function loop(val, min, max) {
 }
 
 function decorateMap(width, height) {
-	highlightSelected();
+	const showArcsCheckbox = document.getElementById("showArcs");
 
-	const showArcs = document.getElementById("showArcs")?.checked;
-	const cropRingsToBiome = Alpine.store('data').cropRingsToBiome;
-	const manualArcRotation = Alpine.store('data').manualArcRotation;
+	if (showArcsCheckbox.checked) {
+		const manualArcRotation = Alpine.store('data').manualArcRotation;
 
-	if (showArcs) {
 		const innerStart = (manualArcRotation) ? document.getElementById('innerArcSlider').value * Math.PI / 180 : stoneArc.start;
 		const innerEnd = (manualArcRotation) ? loop(document.getElementById('innerArcSlider').value - 180, 0, 359) * Math.PI / 180 : stoneArc.end;
 
-		drawArcs(innerStart, innerEnd);
+		drawArcs(_global_ctx, innerStart, innerEnd);
 
 		const outerStart = (manualArcRotation) ? document.getElementById('outerArcSlider').value * Math.PI / 180 : wildernessArc.start;
 		const outerEnd = (manualArcRotation) ? loop(document.getElementById('outerArcSlider').value - 120, 0, 359) * Math.PI / 180 : wildernessArc.end;
 
-		drawOuterArcs(outerStart, outerEnd);
+		drawOuterArcs(_global_ctx, outerStart, outerEnd);
 	}
 
 	if (Alpine.store('data').showCustomRing) {
-		if (shouldDrawOnOverlay)
-			drawOverlayCircle(parseInt(Alpine.store('data').customRing));
-		else
-			drawCircle(parseInt(Alpine.store('data').customRing))
+		drawCircle(_global_ctx, Alpine.store('data').customRing);
 	}
 
 	if (Alpine.store('data').mapLoaded) {
@@ -215,65 +187,7 @@ function decorateMap(width, height) {
 			category.items.forEach(circle => {
 				if (circle.visible)
 					circle.radii.forEach(radius => {
-						if (cropRingsToBiome) {
-							let hasBeenCropped = false;
-
-							circle.locations.forEach(location => {
-								if (location.ring) {
-									if (location.ring === RINGS.CLAY || location.ring === RINGS.STONE) {
-										const start = (manualArcRotation) ? document.getElementById('innerArcSlider').value * Math.PI / 180 : stoneArc.start;
-										const end = (manualArcRotation) ? loop(document.getElementById('innerArcSlider').value - 180, 0, 359) * Math.PI / 180 : stoneArc.end;
-
-										let startOffset = endOffset = 0;
-										switch (location.ring) {
-											case RINGS.CLAY:
-												startOffset = CLAY_ARC_START_OFFSET;
-												endOffset = CLAY_ARC_END_OFFSET;
-												break;
-											case RINGS.STONE:
-												startOffset = STONE_ARC_START_OFFSET;
-												endOffset = STONE_ARC_END_OFFSET;
-												break;
-										}
-
-										drawOverlayAnnulus(radius, start + (2.5 * Math.PI / 180) - startOffset, end - (2.5 * Math.PI / 180) - endOffset, circle.color, false);
-										hasBeenCropped = true;
-									} else {
-										const start = (manualArcRotation) ? document.getElementById('outerArcSlider').value * Math.PI / 180 : wildernessArc.start;
-										const end = (manualArcRotation) ? loop(document.getElementById('outerArcSlider').value - 120, 0, 359) * Math.PI / 180 : wildernessArc.end;
-
-										let startOffset = endOffset = 0;
-										switch (location.ring) {
-											case RINGS.SUNKENSEA:
-												startOffset = SUNKENSEA_ARC_START_OFFSET;
-												endOffset = SUNKENSEA_ARC_END_OFFSET;
-												break;
-											case RINGS.WILDERNESS:
-												startOffset = WILDERNESS_ARC_START_OFFSET;
-												endOffset = WILDERNESS_ARC_END_OFFSET;
-												break;
-											case RINGS.DESERT:
-												startOffset = DESERT_ARC_START_OFFSET;
-												endOffset = DESERT_ARC_END_OFFSET;
-												break;
-										}
-										drawOverlayAnnulus(radius, start - startOffset, end - endOffset, circle.color, true);
-										hasBeenCropped = true;
-									}
-								}
-							});
-
-							if (hasBeenCropped === false)
-								if (shouldDrawOnOverlay)
-									drawOverlayCircle(radius, circle.color);
-								else
-									drawCircle(radius, circle.color);
-						} else {
-							if (shouldDrawOnOverlay)
-								drawOverlayCircle(radius, circle.color);
-							else
-								drawCircle(radius, circle.color);
-						}
+						drawCircle(_global_ctx, radius, circle.color);
 					});
 			});
 		});
@@ -350,24 +264,17 @@ function userDefinedChanged() {
 	}
 }
 
-function drawCircle(radius, color = "#FFFFFF") {
-	_global_ctx.globalAlpha = Alpine.store('data').ringTransparency / 100;
-	_global_ctx.lineWidth = 20;
-	_global_ctx.strokeStyle = color;
-	_global_ctx.beginPath();
-	_global_ctx.arc(coreLoc.x, coreLoc.y, radius, 0, 2 * Math.PI);
-	_global_ctx.stroke();
-	_global_ctx.globalAlpha = 1.0;
-}
-
-function drawAnnulus(ctx, radius, start, end, color = "#FFFFFF") {
+function drawCircle(ctx, radius, color = "#FFFFFF") {
 	ctx.globalAlpha = Alpine.store('data').ringTransparency / 100;
-	ctx.fillStyle = color;
-	annulus(ctx, coreLoc.x, coreLoc.y, radius - 10, radius + 10, start, end, true);
+	ctx.lineWidth = 20;
+	ctx.strokeStyle = color;
+	ctx.beginPath();
+	ctx.arc(coreLoc.x, coreLoc.y, radius, 0, 2 * Math.PI);
+	ctx.stroke();
 	ctx.globalAlpha = 1.0;
 }
 
-function annulus(ctx, centerX, centerY,
+function annulus(centerX, centerY,
 	innerRadius, outerRadius,
 	startAngle, endAngle,
 	anticlockwise) {
@@ -376,44 +283,56 @@ function annulus(ctx, centerX, centerY,
 	var startOfOuterArcX = outerRadius * Math.cos(th2) + centerX;
 	var startOfOuterArcY = outerRadius * Math.sin(th2) + centerY;
 
-	ctx.beginPath();
-	ctx.arc(centerX, centerY, innerRadius, th1, th2, anticlockwise);
-	ctx.lineTo(startOfOuterArcX, startOfOuterArcY);
-	ctx.arc(centerX, centerY, outerRadius, th2, th1, !anticlockwise);
-	ctx.fill();
-	ctx.closePath();
+	_global_ctx.beginPath();
+	_global_ctx.arc(centerX, centerY, innerRadius, th1, th2, anticlockwise);
+	_global_ctx.lineTo(startOfOuterArcX, startOfOuterArcY);
+	_global_ctx.arc(centerX, centerY, outerRadius, th2, th1, !anticlockwise);
+	_global_ctx.fill();
+	_global_ctx.closePath();
 }
 
-function drawArcs(start, end) {
+function drawArcs(ctx, start, end) {
+	ctx.globalAlpha = Alpine.store('data').biomeTransparency / 100;
+
 	start = start + (2.5 * Math.PI / 180);
 	end = end - (2.5 * Math.PI / 180);
 
-	if (shouldDrawOnOverlay) {
-		drawOverlayArcs(150, SEARCH_RADII.max - 50, start - STONE_ARC_START_OFFSET, end - STONE_ARC_END_OFFSET, "#C2C2C2", false);
-		drawOverlayArcs(150, SEARCH_RADII.max - 50, start - CLAY_ARC_START_OFFSET, end - CLAY_ARC_END_OFFSET, "#A66829", false);
-	} else {
-		drawArc(150, SEARCH_RADII.max - 50, start - STONE_ARC_START_OFFSET, end - STONE_ARC_END_OFFSET, "#C2C2C2");
-		drawArc(150, SEARCH_RADII.max - 50, start - CLAY_ARC_START_OFFSET, end - CLAY_ARC_END_OFFSET, "#A66829");
-	}
+	//ARC starts 0 at 3 oclock
+	_global_ctx.fillStyle = "#C2C2C2";
+	annulus(coreLoc.x, coreLoc.y, 150, SEARCH_RADII.max - 50, start - Math.PI / 2, end - Math.PI / 2);
+
+	// _global_ctx.beginPath();
+	// _global_ctx.arc(coreLoc.x, coreLoc.y, SEARCH_RADII.max - 50, start - Math.PI / 2, end - Math.PI / 2);
+	// _global_ctx.fill();
+
+	_global_ctx.fillStyle = "#A66829";
+	annulus(coreLoc.x, coreLoc.y, 150, SEARCH_RADII.max - 50, start + Math.PI / 2, end + Math.PI / 2);
+
+	// _global_ctx.beginPath();
+	// _global_ctx.arc(coreLoc.x, coreLoc.y, SEARCH_RADII.max - 50, start + Math.PI / 2, end + Math.PI / 2);
+	// _global_ctx.fill();
+
+	ctx.globalAlpha = 1.0;
 }
 
-function drawOuterArcs(start, end) {
-	if (shouldDrawOnOverlay) {
-		drawOverlayArcs(OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180), end - Math.PI / 2 + (2.25 * Math.PI / 180), "#3B7EDB", true)
-		drawOverlayArcs(OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3), end - Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3), "#2B941B", true);
-		drawOverlayArcs(OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2, end - Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2, "#CFC35D", true);
-	} else {
-		drawArc(OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180), end - Math.PI / 2 + (2.25 * Math.PI / 180), "#3B7EDB")
-		drawArc(OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3), end - Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3), "#2B941B");
-		drawArc(OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2, end - Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2, "#CFC35D");
-	}
-}
+function drawOuterArcs(ctx, start, end) {
+	ctx.globalAlpha = Alpine.store('data').biomeTransparency / 100;
 
-function drawArc(innerRadius, outerRadius, start, end, color = "#FFFFFF", anticlockwise = true) {
-	_global_ctx.globalAlpha = Alpine.store('data').ringTransparency / 100;
-	_global_ctx.fillStyle = color;
-	annulus(_global_ctx, coreLoc.x, coreLoc.y, innerRadius * scale, outerRadius * scale, start, end, anticlockwise);
-	_global_ctx.globalAlpha = 1.0;
+	_global_ctx.fillStyle = "#3B7EDB";
+	annulus(coreLoc.x, coreLoc.y, OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180), end - Math.PI / 2 + (2.25 * Math.PI / 180), true);
+
+	_global_ctx.fillStyle = "#2B941B";
+	annulus(coreLoc.x, coreLoc.y, OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3), end - Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3), true);
+
+	_global_ctx.fillStyle = "#CFC35D";
+	annulus(coreLoc.x, coreLoc.y, OUTER_SEARCH_RADII.min + 20, OUTER_SEARCH_RADII.max + 700, start - Math.PI / 2 - (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2, end - Math.PI / 2 + (2.25 * Math.PI / 180) + ((2 * Math.PI) / 3) * 2, true);
+
+	// _global_ctx.beginPath();
+	//_global_ctx.arc(coreLoc.x, coreLoc.y, OUTER_SEARCH_RADII.max, wildernessArc.start - Math.PI / 2, wildernessArc.end - Math.PI / 2, true);
+	//_global_ctx.lineTo()
+	//_global_ctx.arc(coreLoc.x, coreLoc.y, SEARCH_RADII.max, wildernessArc.start - Math.PI / 2, wildernessArc.end - Math.PI / 2, false);
+	// _global_ctx.fill();
+	ctx.globalAlpha = 1.0;
 }
 
 function drawMap(tiles) {
@@ -431,7 +350,7 @@ function drawMap(tiles) {
 	}
 	coreLoc.x = -minx * TILE_SIZE;
 	coreLoc.y = (maxy + 1) * TILE_SIZE;
-	const canvas = document.getElementById("mapcanvas");
+	const canvas = document.getElementById('mapcanvas');
 	canvas.width = (maxx - minx + 1) * TILE_SIZE;
 	canvas.height = (maxy - miny + 1) * TILE_SIZE;
 	// const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -446,8 +365,11 @@ function drawMap(tiles) {
 			_global_ctx.drawImage(tiles[i].image, px, py);
 		}
 	}
+	// cache original image
 	_image_cache = new Image();
 	_image_cache.src = canvas.toDataURL();
+	_image_pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	_decorated_pixelData = _image_pixelData;
 
 	if (previousCoreRelativeOffset) {
 		panToPreviousCoreRelativeOffset();
@@ -456,44 +378,22 @@ function drawMap(tiles) {
 		panToCore();
 	}
 
-	if (Alpine.store("data").mapLoaded === false) {
-		panZoomElem.zoom(1, { animate: true });
-		resetOverlayLists();
-		panToCore();
-		Alpine.store('data').mapLoaded = true;
-		drawOverlay();
-	}
-
-	if (Alpine.store("data").firstTimeLoaded === false) {
-		Alpine.store("data").faqOpen = false;
-		Alpine.store("data").aboutOpen = false;
-		Alpine.store("data").cookiesOpen = false;
-	}
-	Alpine.store("data").firstTimeLoaded = true;
-
+	Alpine.store('data').mapLoaded = true;
+	Alpine.store('data').firstTimeLoaded = true;
+	highlightSelected();
 	decorateMap(canvas.width, canvas.height);
 }
 
 function highlightSelected() {
-	let searchobj = { count: 0, boulders: {} };
+	_decorated_pixelData = getCanvasPixelData();
 
-	buildHighlightSelection(searchobj);
+	const filters = buildHighlightSelection();
+	if(filters) highlightColors(_decorated_pixelData, filters);
 
-	const canvas = document.getElementById("mapcanvas");
-	const myImage = _global_ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-	if (searchobj.count > 0) {
-		highlightColors(myImage, searchobj);
+	if (Alpine.store('data').showMazeHoles) {
+		findHole(_decorated_pixelData.data, _decorated_pixelData.width);
 	}
-
-	if (Alpine.store("data").showMazeHoles || Alpine.store("data").cropRingsToBiome) {
-		findStone(myImage.data, canvas.width);
-
-		if (Alpine.store("data").cropRingsToBiome) {
-			findWilderness(myImage.data, canvas.width);
-		}
-	}
-	_global_ctx.putImageData(myImage, 0, 0);
+	_global_ctx.putImageData(_decorated_pixelData, 0, 0);
 }
 
 function recenterMap() {
@@ -501,112 +401,48 @@ function recenterMap() {
 	panToCore();
 }
 
-function testPixel(width, myImageData, r, g, b, x, y) {
-	let i = (y * width + x) * 4;
-	let r1 = myImageData[i], g1 = myImageData[i + 1], b1 = myImageData[i + 2];
+function highlightColors(imageData, {normal, boulders})
+{
+	const {data:pixelArray, width} = imageData;
+	const alpha = Alpine.store('data').tileTransparency / 100 * 255;
+	const length = pixelArray.length;
 
-	return (r == r1 && g == g1 && b == b1);
-}
-
-function highlightPixel(width, myImageData, x, y) {
-	let i = (y * width + x) * 4;
-	myImageData[i + 3] = 255;
-}
-
-function testBoulder(width, myImageData, r, g, b, x, y, x1, y1) {
-	let i = (y * width + x) * 4;
-	let count = 0;
-	if (testPixel(width, myImageData, r, g, b, x1, y1)) {
-		count++;
-	}
-	if (testPixel(width, myImageData, r, g, b, x, y1)) {
-		count++;
-	}
-	if (testPixel(width, myImageData, r, g, b, x1, y)) {
-		count++;
-	}
-	if (count == 3) {
-		highlightPixel(width, myImageData, x1, y1);
-		highlightPixel(width, myImageData, x, y1);
-		highlightPixel(width, myImageData, x1, y);
-		highlightPixel(width, myImageData, x, y);
-	} else if (myImageData[i + 3] != 255) {
-		let alpha = Alpine.store('data').tileTransparency / 100 * 255;
-		myImageData[i + 3] = alpha;
+	for (let i = 0; i < length; i += 4) {
+		if (pixelArray[i + 3] === 0) continue;
+		const r = pixelArray[i], g = pixelArray[i+1], b = pixelArray[i+2];
+		pixelArray[i + 3] = normal.isMatch(r,g,b) ? 255 : alpha;
+		if(boulders.isMatch(r,g,b)) highlightBoulders(imageData, i);
 	}
 }
 
-function highlightBoulder(myImage, r, g, b, x, y) {
-	const myImageData = myImage.data;
-	let count = 0;
-
-	count = 0;
-	/*if (x > 0 &&  y > 0) {
-	  testBoulder(myImage.width, myImageData, r, g, b, x, y, x - 1, y - 1);
+function checkBoulders(imageData, x, y)
+{
+	const {data:pixelArray, width, height} = imageData;
+	function getHexCode(x, y)
+	{
+		const i = (y*width + x)*4;
+		return pixelArray[i] << 16 + pixelArray[i+1] << 8 + pixelArray[i+2];
 	}
-	//test bottom left
-	if (x > 0 && y < myImage.height) {
-	  testBoulder(myImage.width, myImageData, r, g, b, x, y, x - 1, y + 1);
-	}*/
-	//test bottom right
-	if (x < myImage.width && y < myImage.height) {
-		testBoulder(myImage.width, myImageData, r, g, b, x, y, x + 1, y + 1);
-	}/*
-  if (x < myImage.width && y > 0) {
-    testBoulder(myImage.width, myImageData, r, g, b, x, y, x + 1, y - 1);
-  }*/
+
+	if(x-1 >= width || y-1 >= height) return false;
+	const baseHex = getHexCode(x, y);
+	if(getHexCode(x+1, y) !== baseHex || getHexCode(x, y+1) !== baseHex || getHexCode(x+1, y+1) !== baseHex) return false;
+	return true;
 }
 
-function highlightColors(myImage, search) {
-	const myImageData = myImage.data;
-	let alpha = Alpine.store('data').tileTransparency / 100 * 255;
+function highlightBoulders(imageData, i)
+{
+	const {data:pixelArray, width, height} = imageData;
+	const x = (i/4) % width;
+	const y = Math.floor((i/4) / width);
 
-	for (let i = 0; i < myImageData.length; i += 4) {
-		if (myImageData[i + 3] != 0) { //if not transparent
-			let r = myImageData[i], g = myImageData[i + 1], b = myImageData[i + 2];
-			if (search[r] && search[r][g] && search[r][g][b]) {
-				myImageData[i + 3] = 255;
-			} else {
-				myImageData[i + 3] = alpha;
-			}
-		}
-	}
-	for (let i = 0, p = 0; i < myImageData.length; i += 4, ++p) {
-		if (myImageData[i + 3] != 0) { //if not transparent
-
-			let x = parseInt(p % myImage.width);
-			let y = parseInt(p / myImage.width);
-			let r = myImageData[i], g = myImageData[i + 1], b = myImageData[i + 2];
-			if (search.boulders[r] && search.boulders[r][g] && search.boulders[r][g][b]) {
-				highlightBoulder(myImage, r, g, b, x, y);
-			}
-		}
-	}
-}
-
-function _highlightColors(myImage, search) {
-	const myImageData = myImage.data;
-	let alpha = Math.max(TileSliderInfo.transparency(), 1);
-
-	for (let i = 0; i < myImageData.length; i += 4) {
-		if (myImageData[i + 3] != 0) { //if not transparent
-			let r = myImageData[i], g = myImageData[i + 1], b = myImageData[i + 2];
-			if (search[r] && search[r][g] && search[r][g][b]) {
-				myImageData[i + 3] = 255;
-			} else {
-				myImageData[i + 3] = alpha;
-			}
-		}
-	}
-	for (let i = 0, p = 0; i < myImageData.length; i += 4, ++p) {
-		if (myImageData[i + 3] != 0) { //if not transparent
-
-			let x = parseInt(p % myImage.width);
-			let y = parseInt(p / myImage.width);
-			let r = myImageData[i], g = myImageData[i + 1], b = myImageData[i + 2];
-			if (search.boulders[r] && search.boulders[r][g] && search.boulders[r][g][b]) {
-				highlightBoulder(myImage, r, g, b, x, y);
-			}
+	if(!checkBoulders(imageData, x, y)) return;
+	for(let dx=0; dx<2; dx++)
+	{
+		for(let dy=0; dy<2; dy++)
+		{
+			let index = ((y+dy)*width + x+dx)*4 + 3;
+			pixelArray[index] = 255
 		}
 	}
 }

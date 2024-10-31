@@ -17,6 +17,7 @@ const TileType = {
 	SpawnTiles: "Spawn Tiles",
 	Liquids: "Liquids",
 	Boulders: "Boulders",
+	Destructibles: "Destructibles",
 	Ores: "Ores",
 	Objects: "Objects"
 };
@@ -278,7 +279,7 @@ let tileColors = [
 		"set": TileType.Ungrouped,
 		"tiles": [
 		]
-	},*/
+	},
 ];
 
 let tileColorMap = [

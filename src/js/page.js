@@ -2,6 +2,29 @@ const updatemap = () => { drawMap(tilelist) };
 
 let tilelist = [];
 
+document.addEventListener("keypress", function (event) {
+	if (Alpine.store('data').mapLoaded === false) return;
+
+	if (event.key === 'c') {
+		recenterMap();
+	}
+
+	if (event.key === 'h') {
+		Alpine.store('data').showMazeHoles = !Alpine.store('data').showMazeHoles;
+		redrawMap();
+	}
+
+	if (event.key === 'g') {
+		Alpine.store('data').showChunkGrid = !Alpine.store('data').showChunkGrid;
+		redrawMap();
+	}
+
+	if (event.key === 'G') {
+		Alpine.store('data').showMobGrid = !Alpine.store('data').showMobGrid;
+		redrawMap();
+	}
+});
+
 document.addEventListener('alpine:init', function () {
 
 	const canWatchFile = typeof window.showOpenFilePicker !== "undefined";
@@ -102,6 +125,7 @@ function resetMap() {
 	tilelist = [];
 	HIGHEST_STONE = 0;
 	HIGHEST_WILDERNESS = 0;
+	isStoneFound = false;
 	document.getElementById('showArcs').checked = false;
 }
 
@@ -137,7 +161,7 @@ function onChangeGridTransparency(event) {
 	redrawMap();
 }
 function onChangeTileTransparency(event) {
-	redrawMap();
+	redrawMapDirty();
 }
 
 function onChangeCropRingsToBiome(event) {
@@ -173,7 +197,11 @@ function onChangeShowMobGrid(event) {
 }
 
 function onChangeShowMazeHoles(event) {
-	redrawDebounce(event);
+	event.target.setAttribute("disabled", "true");
+	redrawMapDirty();
+	setTimeout(() => {
+		event.target.removeAttribute("disabled");
+	}, 10);
 }
 
 function onChangeShowArcs(event) {
@@ -181,10 +209,9 @@ function onChangeShowArcs(event) {
 	event.target.setAttribute("disabled", "true");
 
 	if (checked) {
-		const canvas = document.getElementById("mapcanvas");
-		const myImage = _global_ctx.getImageData(0, 0, canvas.width, canvas.height);
-		findStone(myImage.data, canvas.width);
-		findWilderness(myImage.data, canvas.width);
+		const myImage = getCanvasPixelData();
+		findStone(myImage.data, myImage.width);
+		findWilderness(myImage.data, myImage.width);
 	}
 
 	redrawMap();
