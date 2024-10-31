@@ -3,10 +3,10 @@
 Continuation of Craigins' Map Tool
 
 # Test branch
-The current branch is deployed to https://micke90s.github.io/CoreKeeperMapTool/src/index.html as a test environment 
+The current branch is deployed to [./src/index.html](https://micke90s.github.io/CoreKeeperMapTool/src/index.html) as a test environment 
 for the open pull requests  
 
-See https://github.com/Ceddini/CoreKeeperMapTool/pulls
+See [Pull requests](https://github.com/Ceddini/CoreKeeperMapTool/pulls)
 
 Current branch `test `contains: 
 * [#35 [Performance] Improve overall performance/](https://github.com/Ceddini/CoreKeeperMapTool/pull/35)
