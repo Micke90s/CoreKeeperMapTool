@@ -92,6 +92,7 @@ let tileColors = [
 			new Tile("Galaxite Boulder", 215, 220, 251),
 			new Tile("Solarite Boulder", 226, 161, 44),
 			new Tile("Pandorium Boulder", 9, 175, 36),
+			new Tile("Relucite Boulder", 153, 61, 245),
 		],
 
 	},
@@ -107,6 +108,7 @@ let tileColors = [
 			new Tile("Galaxite Ore", 247, 240, 220),
 			new Tile("Solarite Ore", 255, 190, 78),
 			new Tile("Pandorium Ore", 9, 175, 36),
+			new Tile("Relucite Ore", 153, 62, 246),
 			// misc
 			new Tile("Ancient Gemstone", 0, 147, 255),
 		],
@@ -122,7 +124,7 @@ let tileColors = [
 			new Tile("Turf Block", 70, 103, 81),
 			new Tile("Clay Block", 193, 100, 54),
 			// doesn't show wall color on map...
-			// new Tile("Dark Stone Block", 123, 140, 172),
+			new Tile("Dark Stone Block", 50, 70, 85),
 			new Tile("Stone Block", 73, 103, 125),
 			new Tile("Larva Hive Block", 163, 97, 83),
 			new Tile("Grass Block", 22, 131, 27),
@@ -137,6 +139,13 @@ let tileColors = [
 			new Tile("Lava Rock Block", 56, 52, 71),
 			new Tile("Fossil Block", 89, 86, 100),
 			new Tile("Obsidian Block", 22, 42, 39),
+
+			new Tile("Oasis Block", 168, 76, 30),
+			new Tile("Excavation Block", 42, 64, 48),
+			new Tile("Industrial Block", 19, 54, 47),
+			new Tile("Tuff Block", 80, 73, 49),
+			//new Tile("Silicate Block", , , ),
+			new Tile("Void Infused Tuff Block", 80, 49, 79),
 		],
 	},
 	{
@@ -149,7 +158,7 @@ let tileColors = [
 			new Tile("Meadow Block", 239, 225, 179),
 			new Tile("Turf Block", 86, 128, 100),
 			new Tile("Clay Block", 232, 139, 105),
-			new Tile("Dark Stone Block", 123, 140, 172),
+			new Tile("Dark Stone Block", 85, 114, 135),
 			new Tile("Stone Block", 103, 131, 151),
 			new Tile("Larva Hive Block", 199, 116, 99),
 			new Tile("Grass Block", 61, 155, 65),
@@ -164,6 +173,13 @@ let tileColors = [
 			new Tile("Lava Rock Block", 85, 78, 106),
 			new Tile("Fossil Block", 192, 186, 207),
 			new Tile("Obsidian Block", 31, 67, 62),
+
+			new Tile("Oasis Block", 199, 113, 56),
+			new Tile("Excavation Block", 64, 91, 68),
+			new Tile("Industrial Block", 43, 79, 59),
+			new Tile("Tuff Block", 106, 98, 72),
+			//new Tile("Silicate Block", , , ),
+			new Tile("Void Infused Tuff Block", 106, 72, 102),
 		],
 	},
 	{
