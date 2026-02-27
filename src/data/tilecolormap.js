@@ -62,8 +62,11 @@ let tileColors = [
 			new Tile("Lush Moss", 163, 206, 74),
 			new Tile("Urban Moss", 42, 169, 71),
 			new Tile("Valley Moss", 249, 116, 67),
+			new Tile("Muddled Moss", 64, 118, 113),
 			// shimmering
 			new Tile("Crystal Crust", 15, 162, 184),
+			// breaker
+			new Tile("Rust Pile", 149, 144, 136),
 		],
 	},
 	{
@@ -78,7 +81,7 @@ let tileColors = [
 			new Tile("Grimy Water", 61, 57, 89),
 			new Tile("Sea Water", 52, 208, 255),
 			new Tile("Lava", 204, 68, 33),
-		]
+		],
 	},
 	{
 		"set": TileType.Boulders,
@@ -94,7 +97,6 @@ let tileColors = [
 			new Tile("Pandorium Boulder", 9, 175, 36),
 			new Tile("Relucite Boulder", 153, 61, 245),
 		],
-
 	},
 	{
 		"set": TileType.Ores,
@@ -123,7 +125,6 @@ let tileColors = [
 			new Tile("Meadow Block", 224, 201, 97),
 			new Tile("Turf Block", 70, 103, 81),
 			new Tile("Clay Block", 193, 100, 54),
-			// doesn't show wall color on map...
 			new Tile("Dark Stone Block", 50, 70, 85),
 			new Tile("Stone Block", 73, 103, 125),
 			new Tile("Larva Hive Block", 163, 97, 83),
@@ -131,6 +132,7 @@ let tileColors = [
 			new Tile("Beach Block", 180, 147, 154),
 			new Tile("Mold Block", 89, 156, 186),
 			new Tile("Desert Block", 166, 146, 152),
+			new Tile("Oasis Block", 168, 76, 30),
 			new Tile("Metropolis Block", 49, 77, 87),
 			new Tile("Alien Tech Block", 70, 62, 102),
 			new Tile("Crystal Block", 42, 89, 238),
@@ -138,14 +140,14 @@ let tileColors = [
 			new Tile("Maze Block", 60, 79, 57),
 			new Tile("Lava Rock Block", 56, 52, 71),
 			new Tile("Fossil Block", 89, 86, 100),
-			new Tile("Obsidian Block", 22, 42, 39),
 
-			new Tile("Oasis Block", 168, 76, 30),
-			new Tile("Excavation Block", 42, 64, 48),
-			new Tile("Industrial Block", 19, 54, 47),
 			new Tile("Tuff Block", 80, 73, 49),
-			//new Tile("Silicate Block", , , ),
 			new Tile("Void Infused Tuff Block", 80, 49, 79),
+			new Tile("Excavation Block", 42, 64, 48),
+			//new Tile("Silicate Block", , , ),
+
+			new Tile("Industrial Block", 19, 54, 47),
+			new Tile("Obsidian Block", 22, 42, 39),
 		],
 	},
 	{
@@ -165,6 +167,7 @@ let tileColors = [
 			new Tile("Beach Block", 235, 192, 190),
 			new Tile("Mold Block", 108, 188, 224),
 			new Tile("Desert Block", 210, 154, 124),
+			new Tile("Oasis Block", 199, 113, 56),
 			new Tile("Metropolis Block", 87, 128, 132),
 			new Tile("Alien Tech Block", 69, 106, 115),
 			new Tile("Crystal Block", 57, 136, 219),
@@ -172,14 +175,15 @@ let tileColors = [
 			new Tile("Maze Block", 83, 100, 96),
 			new Tile("Lava Rock Block", 85, 78, 106),
 			new Tile("Fossil Block", 192, 186, 207),
-			new Tile("Obsidian Block", 31, 67, 62),
 
-			new Tile("Oasis Block", 199, 113, 56),
-			new Tile("Excavation Block", 64, 91, 68),
-			new Tile("Industrial Block", 43, 79, 59),
+
 			new Tile("Tuff Block", 106, 98, 72),
-			//new Tile("Silicate Block", , , ),
 			new Tile("Void Infused Tuff Block", 106, 72, 102),
+			new Tile("Excavation Block", 64, 91, 68),
+			//new Tile("Silicate Block", , , ),
+
+			new Tile("Industrial Block", 43, 79, 59),
+			new Tile("Obsidian Block", 31, 67, 62),
 		],
 	},
 	{
@@ -193,6 +197,8 @@ let tileColors = [
 			new Tile("Coral Wall", 222, 142, 178),
 			new Tile("Galaxite Wall", 221, 221, 221),
 			new Tile("Gleam Wood Wall", 15, 161, 174),
+			new Tile("Poison Berry Wall", 185, 105, 209),
+			new Tile("Molten Wall", 184, 38, 18),
 
 			// seasonal
 			new Tile("Eerie Wall", 103, 79, 122),
@@ -243,6 +249,7 @@ let tileColors = [
 			// found
 			new Tile("Caveling Floor Tile", 130, 130, 130),
 			new Tile("Woven Mat", 58, 139, 65),
+			new Tile("Ground Oil", 72, 57, 120),
 		],
 	},
 	{
@@ -315,6 +322,7 @@ let tileColors = [
 			new Tile("Coral Bridge", 200, 92, 204),
 			new Tile("Galaxite Bridge", 172, 179, 169),
 			new Tile("Gleam Wood Bridge", 15, 210, 190),
+			new Tile("Industrial Bridge", 63, 91, 91),
 
 			// found
 			new Tile("Metal Grate", 197, 135, 54),
