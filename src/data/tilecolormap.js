@@ -74,13 +74,12 @@ let tileColors = [
 		"tiles": [
 			// ordered by priority
 			new Tile("Water", 30, 61, 129),
-			new Tile("Lava", 222, 53, 1),
 			new Tile("Acid Water", 117, 103, 48),
 			new Tile("Mold Water", 61, 85, 135),
 			new Tile("Shimmering Water", 154, 198, 243),
 			new Tile("Grimy Water", 61, 57, 89),
 			new Tile("Sea Water", 52, 208, 255),
-			new Tile("Lava", 204, 68, 33),
+			new Tile("Lava", 222, 53, 1),
 		],
 	},
 	{
