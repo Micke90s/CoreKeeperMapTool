@@ -108,7 +108,7 @@ let tileColors = [
 			new Tile("Octarine Ore", 139, 82, 238),
 			new Tile("Galaxite Ore", 247, 240, 220),
 			new Tile("Solarite Ore", 255, 190, 78),
-			new Tile("Pandorium Ore", 9, 175, 36),
+			new Tile("Pandorium Ore", 9, 175, 68),
 			new Tile("Relucite Ore", 153, 62, 246),
 			// misc
 			new Tile("Ancient Gemstone", 0, 147, 255),
@@ -356,6 +356,7 @@ let tileColors = [
 
 			// crates
 			new Tile("Wooden Crate", 114, 60, 17),
+			new Tile("Overgrown Wooden Crate", 97, 72, 34),
 			new Tile("Clay Pot", 99, 48, 19),
 			new Tile("Ancient Crate / Metropolis Crate", 77, 168, 202),
 			new Tile("Flower Vessel", 205, 189, 48),
@@ -370,9 +371,11 @@ let tileColors = [
 			new Tile("Poison Slime Vessels", 91, 50, 110),
 			new Tile("Temple Crate", 238, 205, 99),
 			new Tile("Fossil Cluster", 215, 220, 251),// same as galaxite boulder?
+			new Tile("Sun Crystal",219, 140, 38),
+			new Tile("Oasis Flower Vessel", 83, 109, 39),
 		],
 	},
-	/*{
+	{
 		"set": TileType.Ungrouped,
 		"tiles": [
 			new Tile("Pit", 31, 31, 31),
@@ -389,6 +392,7 @@ let tileColors = [
 	},
 ];
 
+/*
 let tileColorMap = [
 	{
 		"tilesetname": "Dirt",
@@ -1143,8 +1147,8 @@ let tileColorMap = [
 		"b": "132"
 	}
 ];
-*/
 ];
+*/
 
 let tileColorMap = [
 	{
