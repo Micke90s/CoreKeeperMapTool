@@ -138,14 +138,12 @@ let tileColors = [
 			new Tile("Desert Temple Block", 0, 87, 163),
 			new Tile("Maze Block", 60, 79, 57),
 			new Tile("Lava Rock Block", 56, 52, 71),
-			new Tile("Fossil Block", 89, 86, 100),
-
 			new Tile("Tuff Block", 80, 73, 49),
-			new Tile("Void Infused Tuff Block", 80, 49, 79),
+			new Tile("Fossil Block", 89, 86, 100),
 			new Tile("Excavation Block", 42, 64, 48),
-			//new Tile("Silicate Block", , , ),
-
+			new Tile("Void Infused Tuff Block", 80, 49, 79),
 			new Tile("Industrial Block", 19, 54, 47),
+			//new Tile("Silicate Block", , , ),
 			new Tile("Obsidian Block", 22, 42, 39),
 		],
 	},
@@ -173,15 +171,12 @@ let tileColors = [
 			new Tile("Desert Temple Block", 134, 113, 110),
 			new Tile("Maze Block", 83, 100, 96),
 			new Tile("Lava Rock Block", 85, 78, 106),
-			new Tile("Fossil Block", 192, 186, 207),
-
-
 			new Tile("Tuff Block", 106, 98, 72),
-			new Tile("Void Infused Tuff Block", 106, 72, 102),
+			new Tile("Fossil Block", 192, 186, 207),
 			new Tile("Excavation Block", 64, 91, 68),
-			//new Tile("Silicate Block", , , ),
-
+			new Tile("Void Infused Tuff Block", 106, 72, 102),
 			new Tile("Industrial Block", 43, 79, 59),
+			//new Tile("Silicate Block", , , ),
 			new Tile("Obsidian Block", 31, 67, 62),
 		],
 	},
