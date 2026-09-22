@@ -67,6 +67,8 @@ let tileColors = [
 			new Tile("Crystal Crust", 15, 162, 184),
 			// breaker
 			new Tile("Rust Pile", 149, 144, 136),
+			// moss
+			new Tile("Mossy Soil", 161, 95, 65),
 		],
 	},
 	{
@@ -126,6 +128,7 @@ let tileColors = [
 			new Tile("Clay Block", 193, 100, 54),
 			new Tile("Dark Stone Block", 50, 70, 85),
 			new Tile("Stone Block", 73, 103, 125),
+			new Tile("Moss Block",36,87,67),
 			new Tile("Larva Hive Block", 163, 97, 83),
 			new Tile("Grass Block", 22, 131, 27),
 			new Tile("Beach Block", 180, 147, 154),
@@ -159,6 +162,7 @@ let tileColors = [
 			new Tile("Clay Block", 232, 139, 105),
 			new Tile("Dark Stone Block", 85, 114, 135),
 			new Tile("Stone Block", 103, 131, 151),
+			new Tile("Moss Block", 80, 155,136),
 			new Tile("Larva Hive Block", 199, 116, 99),
 			new Tile("Grass Block", 61, 155, 65),
 			new Tile("Beach Block", 235, 192, 190),
@@ -368,6 +372,8 @@ let tileColors = [
 			new Tile("Fossil Cluster", 215, 220, 251),// same as galaxite boulder?
 			new Tile("Sun Crystal",219, 140, 38),
 			new Tile("Oasis Flower Vessel", 83, 109, 39),
+			new Tile("Stoneware Pot", 52, 240, 193),
+			new Tile("Large Stoneware Pot", 36, 208, 165),
 		],
 	},
 	{
